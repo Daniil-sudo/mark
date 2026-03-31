@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from products.models import ProductInfo
+from typing import Any
 
 
 class Contact(models.Model):
@@ -19,6 +20,10 @@ class Contact(models.Model):
 
 
 class Order(models.Model):
+    def __init__(self, *args: Any, **kwargs: Any):
+        super().__init__(args, kwargs)
+        self.id = None
+
     STATUS = [
         ("basket", "Корзина"),
         ("new", "Новый"),

@@ -11,6 +11,12 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import sentry_sdk
+
+sentry_sdk.init(
+    dsn="https://87d5fad4d9b6efd6b34444a4ec96a18b@o4511140945461248.ingest.de.sentry.io/4511140953981008",
+    traces_sample_rate=1.0,
+)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -41,11 +47,13 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     "django_filters",
+    "drf_spectacular",
 
     # Local apps
     "users",
     "products",
     "orders",
+    "core",
 ]
 
 
@@ -58,7 +66,23 @@ REST_FRAMEWORK = {
     "DEFAULT_FILTER_BACKENDS": [
         "django_filters.rest_framework.DjangoFilterBackend",
         "rest_framework.filters.SearchFilter",
-    ]
+    ],
+    "DEFAULT_SCHEMA_CLASS":
+        "drf_spectacular.openapi.AutoSchema",
+
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.UserRateThrottle"
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "user": "10/min"
+    }
+}
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Procurement API',
+    'DESCRIPTION': 'API documentation for Procurement Service',
+    'VERSION': '1.0.0',
+    # Если есть auth:
+    'SERVE_INCLUDE_SCHEMA': False,
 }
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
@@ -139,3 +163,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
