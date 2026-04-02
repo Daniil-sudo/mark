@@ -17,12 +17,12 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
-    path("cart/add/", AddToCart.as_view()),
-    path("cart/remove/<int:item_id>/", RemoveFromCart.as_view()),
-    path("contact/add/", ContactCreate.as_view()),
-    path("confirm/", ConfirmOrder.as_view()),
-    path("history/", OrderHistory.as_view()),
-    path("api/schema/", SpectacularAPIView.as_view()),
-    path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema")),
-    #path("swagger/", schema_view.with_ui('swagger', cache_timeout=0), name='swagger-ui'),
+    path("cart/add/", AddToCart.as_view(), name="add-to-cart"),
+    path("cart/remove/<int:item_id>/", RemoveFromCart.as_view(), name="remove-from-cart"),
+
+    path("contact/create/", ContactCreate.as_view(), name="create-contact"),
+
+    path("confirm/", ConfirmOrder.as_view(), name="confirm-order"),
+
+    path("history/", OrderHistory.as_view(), name="order-history"),
 ]
