@@ -20,9 +20,7 @@ class Contact(models.Model):
 
 
 class Order(models.Model):
-    def __init__(self, *args: Any, **kwargs: Any):
-        super().__init__(args, kwargs)
-        self.id = None
+
 
     STATUS = [
         ("basket", "Корзина"),

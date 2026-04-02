@@ -5,26 +5,38 @@ from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 
 from .models import Order, OrderItem, Contact
-from .serializers import ContactSerializer, OrderSerializer
+from .serializers import ContactSerializer, OrderSerializer, AddToCartSerializer
+from drf_spectacular.utils import extend_schema
 from products.models import ProductInfo
 from core.tasks import send_order_email
 
 class AddToCart(APIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = AddToCartSerializer
+
+    @extend_schema(
+        request=AddToCartSerializer,
+        responses={200: AddToCartSerializer},
+    )
 
     def post(self, request):
-        order, _ = Order.objects.get_or_create(user=request.user, status="basket")
-        product = ProductInfo.objects.get(id=request.data["product_id"])
-        quantity = int(request.data.get("quantity", 1))
-        if quantity <= 0:
-            return Response({"error": "Количество должно быть больше 0"}, status=400)
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-        order_item, created = OrderItem.objects.get_or_create(order=order, product_info=product)
-        if not created:
-            order_item.quantity += quantity
-        else:
-            order_item.quantity = quantity
-        order_item.save()
+        order, _ = Order.objects.get_or_create(
+            user=request.user,
+            status="basket"
+        )
+
+        product = ProductInfo.objects.get(
+            id=serializer.validated_data["product_id"]
+        )
+
+        OrderItem.objects.create(
+            order=order,
+            product_info=product,
+            quantity=serializer.validated_data["quantity"]
+        )
 
         return Response({"message": "Товар добавлен"})
 
